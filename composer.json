@@ -1,0 +1,10 @@
+{
+  "name": "Wordpress/FileAttachmentsRulesCF",
+  "type": "library",
+  "description": "Plugin to manage attachments in contact form 7",
+  "autoload": {
+    "psr-4": {
+      "FileAttachments\\": "lib/"
+    }
+  }
+}
