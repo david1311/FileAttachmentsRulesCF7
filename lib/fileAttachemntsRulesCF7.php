@@ -42,45 +42,68 @@ class fileAttachmentsRulesCF7
                 <th>Shortcode</th>
                 <th>Url</th>
             </tr>
-            <?php $this->getAttachments(); ?>
+            <?php $this->getAttachments('single'); ?>
         </table>
         <?php
-        $this->setFormsToSaveImages();
+        $this->setFormsToSaveImages('single');
+        ?>
+        <table class="wp-list-table widefat fixed striped posts">
+            <tr>
+                <th>Shortcode</th>
+                <th>Url</th>
+                <th>Condition</th>
+            </tr>
+            <?php $this->getAttachments('multiple'); ?>
+        </table>
+        <?php
+        $this->setFormsToSaveImages('multiple');
     }
 
-    private function filterByPrefix($keys) {
-        $filtered = array_filter(array_keys($keys), function($key) {
-            return strpos($key, 'single_') === 0;
-        });
+    private function filterByPrefix($keys, $prefix) {
+        foreach(array_keys($keys) as $key) {
+            if( strpos($key, $prefix) === 0) {
+                $filtered[] = $key;
+            }
+        }
 
-        return $filtered;
+        return isset($filtered) ? $filtered : [];
     }
-    private function getAttachments() {
+
+    private function getAttachments($prefix) {
         $keys =  get_post_meta($_GET['post'], '',false);
-        $names = $this->filterByPrefix($keys);
+        $names = $this->filterByPrefix($keys, $prefix);
 
         foreach($names as $name):
+
             ?>
             <tr>
                 <th>[<?= $name ?>]</th>
                 <th><?= $this->getAttachmentURL($keys[$name]) ?></th>
+                <?= $prefix === 'multiple' ? '<th><input type="text"></th>' : '' ?>
             </tr>
             <?php
         endforeach;
     }
 
     private function getAttachmentURL($id) {
-        $post = get_post(array_shift($id));
-        return $post->guid;
+        $serialize = array_shift($id);
+        $item = json_decode($serialize)->item;
+
+        return get_post($item)->guid;
     }
 
-    private function setFormsToSaveImages() {
-        return fileAttachmentsUpload::getUploadImageGalleryOption();
+    private function setFormsToSaveImages($kind) {
+        return fileAttachmentsUpload::getUploadImageGalleryOption($kind);
     }
 
     public function saveAttachmentCF7() {
         if(isset($_POST['saveAttachmentCF7'])) {
-           update_post_meta($_POST['post_ID'], 'single_attachment_cf7'. rand(), $_POST['saveAttachmentCF7']);
+            $arguments = [
+                'item' =>  $_POST['saveAttachmentCF7'],
+                'condition' => ''
+            ];
+
+           update_post_meta($_POST['post_ID'], $_POST['saveAttachmentCF7type'].'_attachment_cf7'. rand(), json_encode($arguments));
         }
     }
 }

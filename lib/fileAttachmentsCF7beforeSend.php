@@ -13,9 +13,9 @@ class fileAttachmentsCF7beforeSend
 {
     public static function updateValuesCF7beforeSend(&$wpcf7_data) {
         $itemID = self::getValueByShortcode($wpcf7_data->mail['attachments']);
-        $itemPostID = get_post($itemID);
+        $item = json_decode($itemID)->item;
 
-        $wpcf7_data->mail['attachments'] = $itemPostID->guid;
+        $wpcf7_data->mail['attachments'] = get_post($item)->guid;
         $wpcf7_data->skip_mail = true;
     }
 

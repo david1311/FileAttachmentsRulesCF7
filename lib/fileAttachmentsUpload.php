@@ -11,11 +11,13 @@ namespace FileAttachments;
 
 class fileAttachmentsUpload
 {
-    public static function getUploadImageGalleryOption() {
+    public static function getUploadImageGalleryOption($kind) {
         ?>
         <div class="upload">
             <div>
+                <input type="hidden" name="saveAttachmentCF7type" id="saveAttachmentCF7type" value="<?= $kind ?>" />
                 <input type="hidden" name="saveAttachmentCF7" id="saveAttachmentCF7" value="" />
+
                 <button type="submit" class="upload_image_button button"><?= __( 'Upload', RSSFI_TEXT ) ?></button>
             </div>
         </div>
