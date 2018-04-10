@@ -6,5 +6,8 @@
     "psr-4": {
       "FileAttachments\\": "lib/"
     }
+  },
+  "require": {
+    "hoa/ruler": "~2.0"
   }
 }

@@ -9,14 +9,18 @@
 namespace FileAttachments;
 
 
+use Hoa\Ruler\Ruler;
+
 class fileAttachmentsCF7beforeSend
 {
     public static function updateValuesCF7beforeSend(&$wpcf7_data) {
         $itemID = self::getValueByShortcode($wpcf7_data->mail['attachments']);
         $item = json_decode($itemID)->item;
 
-        $wpcf7_data->mail['attachments'] = get_post($item)->guid;
-        $wpcf7_data->skip_mail = true;
+        if(isset($item->condition) && self::isRuleValid($item->condition, $wpcf7_data)) {
+            $wpcf7_data->mail['attachments'] = get_post($item)->guid;
+            $wpcf7_data->skip_mail = true;
+        }
     }
 
     private static function getValueByShortcode($shortcode) {
@@ -28,5 +32,12 @@ class fileAttachmentsCF7beforeSend
         );
 
        return $metaValue[0]->meta_value;
+    }
+
+    private static function isRuleValid($rule, $cf7) {
+        $ruler = new Ruler();
+        $context['subject'] = $cf7->subject;
+
+        return $ruler->assert($rule, $context);
     }
 }
