@@ -13,6 +13,7 @@ class fileAttachmentsRulesCF7
     {
         add_filter('wpcf7_editor_panels', [$this,'setNewSectionCF7']);
         add_action('admin_footer', [$this, 'testUpload']);
+        add_action("wpcf7_before_send_mail", [$this, 'initCF7beforeSend']);
         add_action('save_post', [$this, 'saveAttachmentCF7']);
         add_action( 'admin_enqueue_scripts', [$this,'mediaScrips' ]);
     }
@@ -30,8 +31,20 @@ class fileAttachmentsRulesCF7
         wp_enqueue_media();
     }
 
+    public function initCF7beforeSend($wcf7) {
+        return fileAttachmentsCF7beforeSend::updateValuesCF7beforeSend($wcf7);
+    }
+
     public function fileAttachmentsRulesPage() {
-        $this->getAttachments();
+        ?>
+        <table class="wp-list-table widefat fixed striped posts">
+            <tr>
+                <th>Shortcode</th>
+                <th>Url</th>
+            </tr>
+            <?php $this->getAttachments(); ?>
+        </table>
+        <?php
         $this->setFormsToSaveImages();
     }
 
@@ -46,17 +59,19 @@ class fileAttachmentsRulesCF7
         $keys =  get_post_meta($_GET['post'], '',false);
         $names = $this->filterByPrefix($keys);
 
-        foreach($names as $name) {
+        foreach($names as $name):
             ?>
-            <p><?= $name ?>,<?= $this->getAttachmentURL($keys[$name]) ?></p>
+            <tr>
+                <th>[<?= $name ?>]</th>
+                <th><?= $this->getAttachmentURL($keys[$name]) ?></th>
+            </tr>
             <?php
-        }
+        endforeach;
     }
 
     private function getAttachmentURL($id) {
-        $id = array_shift($id);
-        var_dump(get_post($id));
-
+        $post = get_post(array_shift($id));
+        return $post->guid;
     }
 
     private function setFormsToSaveImages() {
