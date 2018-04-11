@@ -16,7 +16,7 @@ class fileAttachmentsRulesCF7
         add_action("wpcf7_before_send_mail", [$this, 'initCF7beforeSend']);
         add_action('save_post', [$this, 'saveAttachmentCF7']);
         add_action('save_post', [$this, 'saveConditionAttachmentCF7']);
-        add_action( 'admin_enqueue_scripts', [$this,'mediaScrips' ]);
+        add_action('admin_enqueue_scripts', [$this,'mediaScrips' ]);
     }
 
     public function setNewSectionCF7($panels) {
@@ -32,34 +32,6 @@ class fileAttachmentsRulesCF7
         wp_enqueue_media();
     }
 
-    public function initCF7beforeSend($wcf7) {
-        fileAttachmentsCF7beforeSend::updateValuesCF7beforeSend($wcf7);
-    }
-
-    public function fileAttachmentsRulesPage() {
-        ?>
-        <table class="wp-list-table widefat fixed striped posts">
-            <tr>
-                <th>Shortcode</th>
-                <th>Url</th>
-            </tr>
-            <?php $this->getAttachments('single'); ?>
-        </table>
-        <?php
-        $this->setFormsToSaveImages('single');
-        ?>
-        <table class="wp-list-table widefat fixed striped posts">
-            <tr>
-                <th>Shortcode</th>
-                <th>Url</th>
-                <th>Condition</th>
-            </tr>
-            <?php $this->getAttachments('multiple'); ?>
-        </table>
-        <?php
-        $this->setFormsToSaveImages('multiple');
-    }
-
     private function filterByPrefix($keys, $prefix) {
         foreach(array_keys($keys) as $key) {
             if( strpos($key, $prefix) === 0) {
@@ -68,6 +40,38 @@ class fileAttachmentsRulesCF7
         }
 
         return isset($filtered) ? $filtered : [];
+    }
+
+    public function initCF7beforeSend($wcf7) {
+        fileAttachmentsCF7beforeSend::updateValuesCF7beforeSend($wcf7);
+    }
+
+    public function fileAttachmentsRulesPage() {
+        ?>
+        <table class="wp-list-table widefat fixed striped posts">
+            <thead>
+            <tr>
+                <th>Shortcode</th>
+                <th>Url</th>
+            </tr>
+            </thead>
+            <?php $this->getAttachments('single'); ?>
+        </table>
+        <?php
+        $this->setFormsToSaveImages('single');
+        ?>
+        <table class="wp-list-table widefat fixed striped posts">
+            <thead>
+            <tr>
+                <th>Shortcode</th>
+                <th>Url</th>
+                <th>Condition</th>
+            </tr>
+            </thead>
+            <?php $this->getAttachments('multiple'); ?>
+        </table>
+        <?php
+        $this->setFormsToSaveImages('multiple');
     }
 
     private function getAttachments($prefix) {
