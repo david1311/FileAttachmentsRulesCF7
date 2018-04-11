@@ -17,11 +17,23 @@ class fileAttachmentsCF7beforeSend
         $itemID = self::getValueByShortcode($wpcf7_data->mail['attachments']);
         $item = json_decode($itemID);
 
-        if(isset($item->condition) && self::isRuleValid($item->condition, $_POST) == true) {
-            $wpcf7_data->mail['attachments'] = get_post($item)->guid;
-            $wpcf7_data->skip_mail = true;
-        }
+        self::allowOrDenyMailSendByConditionValue($item) === true ? self::attachmentEmbedSend($wpcf7_data, $item) : false;
     }
+
+
+    private static function allowOrDenyMailSendByConditionValue($item): bool {
+        if(!empty($item->condition) && self::isRuleValid($item->condition, $_POST) == true || empty($item->condition)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static function attachmentEmbedSend($contactForm, $item) {
+        $contactForm->mail['attachments'] = get_post($item)->guid;
+        $contactForm->skip_mail = true;
+    }
+
 
     private static function getValueByShortcode($shortcode) {
         global $wpdb;
@@ -33,7 +45,7 @@ class fileAttachmentsCF7beforeSend
         return $metaValue[0]->meta_value;
     }
 
-    private static function isRuleValid($rule, $values): void {
+    private static function isRuleValid($rule, $values): bool {
         $ruler = new Ruler();
         $context = new Context();
 
