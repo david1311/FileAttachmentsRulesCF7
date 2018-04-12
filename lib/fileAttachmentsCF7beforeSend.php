@@ -13,29 +13,31 @@ use Hoa\Ruler\Ruler;
 
 class fileAttachmentsCF7beforeSend
 {
-    public static function updateValuesCF7beforeSend(&$wpcf7_data) {
-        $itemID = self::getValueByShortcode($wpcf7_data->mail['attachments']);
-        $item = json_decode($itemID);
+    public static function getItemAfterCheckIfConditionsAreValid(&$cf7)
+    {
+        $itemID = self::getValueByShortcode($cf7->mail['attachments']);
+        $item   = json_decode($itemID)->item;
 
-        self::allowOrDenyMailSendByConditionValue($item) === true ? self::attachmentEmbedSend($wpcf7_data, $item) : false;
+        return self::allowOrDenyMailSendByConditionValue($item) === true ? self::getEmbedPath($item) : false;
     }
 
 
-    private static function allowOrDenyMailSendByConditionValue($item): bool {
-        if(!empty($item->condition) && self::isRuleValid($item->condition, $_POST) == true || empty($item->condition)) {
+    private static function allowOrDenyMailSendByConditionValue($item): bool
+    {
+        if ( ! empty($item->condition) && self::isRuleValid($item->condition, $_POST) == true || empty($item->condition)) {
             return true;
         }
 
         return false;
     }
 
-    private static function attachmentEmbedSend($contactForm, $item) {
-        $contactForm->mail['attachments'] = get_post($item)->guid;
-        $contactForm->skip_mail = true;
+    private static function getEmbedPath($item) {
+        return get_post($item)->guid;
     }
 
 
-    private static function getValueByShortcode($shortcode) {
+    private static function getValueByShortcode($shortcode)
+    {
         global $wpdb;
         $shortcode = preg_replace("/\[(.+)]/", "$1", $shortcode);
         $metaValue = $wpdb->get_results(
@@ -45,13 +47,14 @@ class fileAttachmentsCF7beforeSend
         return $metaValue[0]->meta_value;
     }
 
-    private static function isRuleValid($rule, $values): bool {
-        $ruler = new Ruler();
+    private static function isRuleValid($rule, $values): bool
+    {
+        $ruler   = new Ruler();
         $context = new Context();
 
-        foreach($values as $key => $value) {
-            if(is_int(strpos($rule, $key))) {
-               $context[$key] = $value;
+        foreach ($values as $key => $value) {
+            if (is_int(strpos($rule, $key))) {
+                $context[$key] = $value;
             }
         }
 
