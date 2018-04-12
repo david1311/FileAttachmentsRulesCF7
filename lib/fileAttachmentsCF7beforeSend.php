@@ -10,7 +10,6 @@ namespace FileAttachments;
 
 use Hoa\Ruler\Context;
 use Hoa\Ruler\Ruler;
-use WP_Query;
 
 class fileAttachmentsCF7beforeSend
 {

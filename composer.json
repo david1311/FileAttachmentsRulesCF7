@@ -8,6 +8,7 @@
     }
   },
   "require": {
-    "hoa/ruler": "~2.0"
+    "hoa/ruler": "~2.0",
+    "phpunit/phpunit": "3.7.*"
   }
 }
