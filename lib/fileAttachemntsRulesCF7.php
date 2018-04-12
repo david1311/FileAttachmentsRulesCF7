@@ -95,7 +95,7 @@ class fileAttachmentsRulesCF7
             $condition = $this->getAttachmentCondition($keys[$name])
             ?>
             <tr>
-                <th>[<?= $name ?>]</th>
+                <th>[<?= $prefix === 'multiple' ? 'multiple_attachment' : $name ?>]</th>
                 <th><?= $this->getAttachmentURL($keys[$name]) ?></th>
                 <?= $prefix === 'multiple' ? "<th><input type='text' class='input_box' name='condition_$name' value='$condition'></th>" : '' ?>
             </tr>
