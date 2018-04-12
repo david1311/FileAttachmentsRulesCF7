@@ -17,15 +17,15 @@ class fileAttachmentsCF7beforeSend
     {
         $attachments = self::getValueByShortcode($cf7->mail['attachments']);
 
-        foreach($attachments as $attachment) {
+        foreach ($attachments as $attachment) {
             $item = json_decode($attachment->meta_value)->item;
 
-            if(self::allowOrDenyMailSendByConditionValue($item) === true) {
-               $items[] = self::getEmbedPath($item);
+            if (self::allowOrDenyMailSendByConditionValue($item) === true) {
+                $items[] = self::getEmbedPath($item);
             }
         }
 
-        return isset($items) ? $items : [];
+        return $items ?? [];
     }
 
 
@@ -38,7 +38,8 @@ class fileAttachmentsCF7beforeSend
         return false;
     }
 
-    private static function getEmbedPath($item) {
+    private static function getEmbedPath($item)
+    {
         return get_post($item)->guid;
     }
 
@@ -47,9 +48,9 @@ class fileAttachmentsCF7beforeSend
     {
         global $wpdb;
         $shortcode = preg_replace("/\[(.+)]/", "$1", $shortcode);
-        if(is_int(strpos($shortcode, 'multiple'))) {
+        if (is_int(strpos($shortcode, 'multiple'))) {
             $multipleValues = $wpdb->get_results(
-                $wpdb->prepare("SELECT meta_value FROM $wpdb->postmeta where meta_key like %s","%" . $shortcode . "%")
+                $wpdb->prepare("SELECT meta_value FROM $wpdb->postmeta where meta_key like %s", "%" . $shortcode . "%")
             );
 
             return $multipleValues;
@@ -59,12 +60,12 @@ class fileAttachmentsCF7beforeSend
             $wpdb->prepare("SELECT meta_value FROM $wpdb->postmeta where meta_key = %s", $shortcode)
         );
 
-        return [$metaValue[0]];
+        return [array_shift($metaValue)];
     }
 
     private static function isRuleValid($rule, $values): bool
     {
-        if(is_null($rule) || empty($rule) )  {
+        if (is_null($rule) || empty($rule)) {
             return true;
         }
 
