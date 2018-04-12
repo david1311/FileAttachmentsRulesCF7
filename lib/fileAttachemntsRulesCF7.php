@@ -16,6 +16,7 @@ class fileAttachmentsRulesCF7
         add_action('admin_footer', [$this, 'testUpload']);
         add_action("wpcf7_before_send_mail", [$this, 'initCF7beforeSend']);
         add_action('save_post', [$this, 'saveAttachmentCF7']);
+        add_action('save_post', [$this, 'deleteAttachmentCF7']);
         add_action('admin_init', [$this, 'enqueueStylesAndScripts']);
         add_filter('wpcf7_mail_components', [$this, 'filterComponentsToSendMail']);
         add_action('save_post', [$this, 'saveConditionAttachmentCF7']);
@@ -97,7 +98,8 @@ class fileAttachmentsRulesCF7
             <tr>
                 <th>[<?= $prefix === 'multiple' ? 'multiple_attachment' : $name ?>]</th>
                 <th><?= $this->getAttachmentURL($keys[$name]) ?></th>
-                <?= $prefix === 'multiple' ? "<th><input type='text' class='input_box' name='condition_$name' value='$condition'></th>" : '' ?>
+                <th><?= $prefix === 'multiple' ? "<input type='text' class='input_box' name='condition_$name' value='$condition'>" : 'Not allowed' ?></th>
+                <th><input name="delete_<?= $name ?>" type="checkbox"></th>
             </tr>
         <?php
         endforeach;
@@ -130,6 +132,19 @@ class fileAttachmentsRulesCF7
         isset($filtered) ? $this->updateConditionsByPostID($filtered, $_POST['post_ID']) : [];
     }
 
+    public function deleteAttachmentCF7()
+    {
+        $toDelete = $this->filterByPrefix($_POST, 'delete_');
+
+        if(is_array($toDelete)) {
+            foreach($toDelete as $item) {
+                $metaKey = str_replace('delete_','',$item);
+
+                delete_post_meta($_POST['post_ID'], $metaKey);
+            }
+        }
+    }
+
     public function saveAttachmentCF7()
     {
         foreach ($this->kinds as $kind) {
@@ -160,18 +175,7 @@ class fileAttachmentsRulesCF7
 
     public function fileAttachmentsRulesPage()
     {
-        ?>
-        <table class="wp-list-table widefat fixed striped posts">
-            <thead>
-            <tr>
-                <th>Shortcode</th>
-                <th>Url</th>
-            </tr>
-            </thead>
-            <?php $this->getAttachments('single'); ?>
-        </table>
-        <?php
-        $this->setFormsToSaveImages('single');
+        foreach($this->kinds as $kind):
         ?>
         <table class="wp-list-table widefat fixed striped posts">
             <thead>
@@ -179,11 +183,13 @@ class fileAttachmentsRulesCF7
                 <th>Shortcode</th>
                 <th>Url</th>
                 <th>Condition</th>
+                <th>Delete?</th>
             </tr>
             </thead>
-            <?php $this->getAttachments('multiple'); ?>
+            <?php $this->getAttachments($kind); ?>
         </table>
         <?php
-        $this->setFormsToSaveImages('multiple');
+        $this->setFormsToSaveImages($kind);
+        endforeach;
     }
 }
