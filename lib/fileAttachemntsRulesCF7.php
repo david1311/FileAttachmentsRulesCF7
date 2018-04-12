@@ -21,12 +21,14 @@ class fileAttachmentsRulesCF7
         add_action('save_post', [$this, 'saveConditionAttachmentCF7']);
     }
 
-    private $attachmentCF7;
+    private $attachmentsCF7;
     private $kinds = ['multiple', 'single'];
 
     public function filterComponentsToSendMail($components)
     {
-        $components['attachments'][] = $this->createTmpFileToSendInMail();
+        foreach($this->attachmentsCF7 as $attachment) {
+            $attachment != null ? $components['attachments'][] = $this->createTmpFileToSendInMail($attachment) : null;
+        }
 
         return $components;
     }
@@ -62,7 +64,7 @@ class fileAttachmentsRulesCF7
 
     public function initCF7beforeSend($wcf7)
     {
-        $this->attachmentCF7 = fileAttachmentsCF7beforeSend::getItemAfterCheckIfConditionsAreValid($wcf7);
+        $this->attachmentsCF7 = fileAttachmentsCF7beforeSend::getItemAfterCheckIfConditionsAreValid($wcf7);
     }
 
     private function filterByPrefix($keys, $prefix)
@@ -102,17 +104,18 @@ class fileAttachmentsRulesCF7
     }
 
 
-    private function createTmpFileToSendInMail()
+    private function createTmpFileToSendInMail($attachment)
     {
-        $temporalName = sys_get_temp_dir() . '/' . pathinfo($this->attachmentCF7)['basename'];
+        $temporalName = sys_get_temp_dir() . '/' . pathinfo($attachment)['basename'];
 
         $temporalFile = tempnam(sys_get_temp_dir(), "TMP_FILE");
         rename($temporalFile, $temporalName);
 
         $handle = fopen($temporalName, "w");
-        fwrite($handle, file_get_contents($this->attachmentCF7));
+        fwrite($handle, file_get_contents($attachment));
 
         return $temporalName;
+
     }
 
     public function saveConditionAttachmentCF7()
